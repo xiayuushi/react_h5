@@ -12,6 +12,9 @@ import { BASEURL } from '../../utils/base_url'
 // 导入redux进行数据共享
 import store from '../../store'
 
+// 导入城市组件
+import City from '../city/city'
+
 // 轮播图组件
 class Slide extends Component {
   // state的简写形式：直接给state赋值，而不是直接字面量声明state对象
@@ -45,7 +48,7 @@ class Slide extends Component {
             {carouselData.map(item => (
               <Link
                 key={item.id}
-                to='/'
+                to='/xxx'
                 style={{
                   display: 'inline-block',
                   width: '100%',
@@ -125,7 +128,7 @@ class Group extends Component {
       <div className='model2'>
         <div className='title_con'>
           <h3>租房小组</h3>
-          <Link href='#' className='iconfont icon-next'></Link>
+          <Link to='/xxx' className='iconfont icon-next'></Link>
         </div>
         <ul className='house_list'>
           {groupData.map(item => (
@@ -166,12 +169,12 @@ class News extends Component {
       <div className='model mb120'>
         <div className='title_con'>
           <h3>最新资讯</h3>
-          <Link href='#' className='iconfont icon-next'></Link>
+          <Link to='/xxx' className='iconfont icon-next'></Link>
         </div>
         <ul className='list'>
           {newsData.map(item => (
             <li key={item.id}>
-              <Link href='#'>
+              <Link to='/xxx'>
                 <img src={BASEURL + item.imgSrc} alt='' />
               </Link>
               <div className='detail_list'>
@@ -194,7 +197,8 @@ class SearchBar extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      currentCity: ''
+      currentCity: '',
+      switchCity: 'city_wrap'
     }
     // 订阅redux中store修改，同步组件数据
     this.unsubscribe = store.subscribe(this.fnStoreChange)
@@ -205,15 +209,25 @@ class SearchBar extends Component {
       currentCity: store.getState().label
     })
   }
+  // 切换城市列表（父传子：弹出 + 子传父：关闭） 
+  fnSwitchCityList = (switchCity) => {
+    this.setState({
+      switchCity
+    })
+  }
 
   componentDidMount () {
     // 判断缓存中是否有当前定位城市的数据，有则从缓存取，无则调接口请求获取
-    let sessionCurrentCity = JSON.parse(
+    let sessionCurrentCityInfo = JSON.parse(
       sessionStorage.getItem('currentCityInfo')
     )
-    if (sessionCurrentCity) {
+    if (sessionCurrentCityInfo) {
       this.setState({
-        currentCity: sessionCurrentCity.label
+        currentCity: sessionCurrentCityInfo.label
+      })
+      store.dispatch({
+        type: 'store_CurrentCityInfo',
+        value: sessionCurrentCityInfo
       })
     } else {
       // 在public/index.html中导入了百度地图API后，BMap对象就会挂载到window对象中
@@ -248,15 +262,21 @@ class SearchBar extends Component {
     }
   }
   render () {
-    let { currentCity } = this.state
+    let { currentCity, switchCity } = this.state
     return (
       <div className='search_bar'>
         <div className='search_con'>
-          <span className='city'>{currentCity}</span>
+          <span className='city' onClick={()=>this.fnSwitchCityList('city_wrap slideUp')}>
+            {currentCity}
+          </span>
           <i className='iconfont icon-xialajiantouxiangxia'></i>
           <span className='village'>
             <i className='iconfont icon-fangdajing'></i> 请输入小区名
           </span>
+          <City
+            switchCity={switchCity}
+            fnSwitchCityList={this.fnSwitchCityList}
+          />
         </div>
         <i className='iconfont icon-ic-maplocation-o tomap'></i>
       </div>

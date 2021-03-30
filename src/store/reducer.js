@@ -1,6 +1,4 @@
-const defaultData = {}
-
-const reducer = (state = defaultData, action) => {
+const reducer = (state = {}, action) => {
   if (action.type === 'store_CurrentCityInfo') {
     return action.value
   }
