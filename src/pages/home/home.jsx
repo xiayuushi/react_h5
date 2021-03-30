@@ -238,10 +238,7 @@ class SearchBar extends Component {
       let myCity = new BMap.LocalCity()
 
       myCity.get(async result => {
-        console.log(this)
-
         let cityName = result.name
-
         // 获取定位城市后发请求，验证当前城市是否在公司业务范围之内
         let res = await this.$request({
           url: `/area/info?name=${cityName}`

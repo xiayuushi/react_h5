@@ -52,20 +52,37 @@ class City extends Component {
   }
   // 请求城市列表
   requestCityList = async () => {
-    let res = await this.$request({
-      url: '/area/city?level=1'
-    })
-
+    let all_city_list
+    // 缓存有：从缓存中取数据
+    if (localStorage.getItem('all_city_list')) {
+      all_city_list = JSON.parse(localStorage.getItem('all_city_list'))
+    } else {
+      // 缓存无：调接口发请求拿数据
+      let res = await this.$request({
+        url: '/area/city?level=1'
+      })
+      // 存储到LocalStorage中，优化组件加载速度
+      all_city_list = res.body
+      localStorage.setItem('all_city_list', JSON.stringify(all_city_list))
+    }
     // 调用封装的方法处理服务器返回的源数据，生成符合渲染的新数据
-    let { cityData, cityDataKey } = formatSourceData(res.body)
+    let { cityData, cityDataKey } = formatSourceData(all_city_list)
+
 
     // 请求热门城市数据
-    let res_hot = await this.$request({
-      url: '/area/hot'
-    })
+    let hot_city_list
+    if (localStorage.getItem('hot_city_list')) {
+      hot_city_list = JSON.parse(localStorage.getItem('hot_city_list'))
+    } else {
+      let res_hot = await this.$request({
+        url: '/area/hot'
+      })
+      hot_city_list = res_hot.body
+      localStorage.setItem('hot_city_list', JSON.stringify(hot_city_list))
+    }
 
     // 将热门城市添加到新数据中
-    cityData['hot'] = res_hot.body
+    cityData['hot'] = hot_city_list
     cityDataKey.unshift('hot')
 
     // 将当前定位城市(以数组形式)添加到新数据中
@@ -153,6 +170,7 @@ class City extends Component {
     let res = await this.$request({
       url: `/area/info?name=${v.label}`
     })
+
     if (res.status === 200) {
       // 当前选择城市与服务器返回的城市名不一致，说明当前选择城市并未展开业务
       if (res.body.label !== v.label) {
