@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
 import './home.css'
 
-import { Link } from 'react-router-dom'
+// 导入withRouter高阶组件
+// 让仅嵌入到当前Home组件却不参与路由的子组件SearchBar组件可以使用编程式导航跳转路由
+import { Link, withRouter } from 'react-router-dom'
 
 // 导入 ant-design-mobile 轮播图组件
 import { Carousel } from 'antd-mobile'
@@ -89,7 +91,7 @@ function Menu () {
         <h4>合租</h4>
       </li>
       <li>
-        <Link to='/layout/home/xxx'>
+        <Link to='/map'>
           <i className='iconfont icon-ic-maplocation-o'></i>
         </Link>
         <h4>地图找房</h4>
@@ -193,6 +195,7 @@ class News extends Component {
 }
 
 // 搜索栏组件
+
 class SearchBar extends Component {
   constructor (props) {
     super(props)
@@ -209,8 +212,8 @@ class SearchBar extends Component {
       currentCity: store.getState().label
     })
   }
-  // 切换城市列表（父传子：弹出 + 子传父：关闭） 
-  fnSwitchCityList = (switchCity) => {
+  // 切换城市列表（父传子：弹出 + 子传父：关闭）
+  fnSwitchCityList = switchCity => {
     this.setState({
       switchCity
     })
@@ -263,7 +266,10 @@ class SearchBar extends Component {
     return (
       <div className='search_bar'>
         <div className='search_con'>
-          <span className='city' onClick={()=>this.fnSwitchCityList('city_wrap slideUp')}>
+          <span
+            className='city'
+            onClick={() => this.fnSwitchCityList('city_wrap slideUp')}
+          >
             {currentCity}
           </span>
           <i className='iconfont icon-xialajiantouxiangxia'></i>
@@ -275,7 +281,10 @@ class SearchBar extends Component {
             fnSwitchCityList={this.fnSwitchCityList}
           />
         </div>
-        <i className='iconfont icon-ic-maplocation-o tomap'></i>
+        <i
+          className='iconfont icon-ic-maplocation-o tomap'
+          onClick={() => this.props.history.push('/map')}
+        ></i>
       </div>
     )
   }
@@ -284,12 +293,14 @@ class SearchBar extends Component {
     this.unsubscribe()
   }
 }
-
+// 使用高阶组件让当前不参与路由跳转的组件也能够使用编程式导航跳转路由
+const WithSearchBar = withRouter(SearchBar)
 class Home extends Component {
   render () {
     return (
       <div>
-        <SearchBar />
+        {/* 使用高阶组件生成的新组件替代之前的SearchBar组件 */}
+        <WithSearchBar />
         <Slide />
         <Menu />
         <Group />
