@@ -2,9 +2,14 @@ import React, { Component } from 'react'
 import './houselist.css'
 
 import { withRouter } from 'react-router-dom'
+import { PickerView, Toast } from 'antd-mobile'
+import { List, AutoSizer, InfiniteLoader } from 'react-virtualized'
+
 import store from '../../store'
+import { BASEURL } from '../../utils/base_url'
+
 import City from '../city/city'
-import { PickerView } from 'antd-mobile'
+import notFound from '../../asstes/images/not-found.png'
 
 // 头部搜索组件
 class Topbar extends Component {
@@ -202,7 +207,7 @@ class Filter extends Component {
     })
   }
 
-  // 查询当前城市的所有房源信息
+  // 查询当前城市的房源信息
   fnGetFilterData = async () => {
     let res = await this.$request({
       url: `/houses/condition?id=${this.state.currentCityInfo.value}`
@@ -318,10 +323,14 @@ class Filter extends Component {
     paramsData.price = _allFilterVal.price[0].split('|')[1]
     // 接口文档要求more参数是一个字符串（将more数组转成字符串，数组中，多个参数的值需要转成字符串以逗号分隔进行拼接）
     paramsData.more = _allFilterVal.more.join()
-    console.log(paramsData)
+    // console.log(paramsData)
 
     // 关闭弹窗
     this.fnHidePop()
+
+    // 因为当前调用的接口与父组件中调用的接口是同一个，且当前是整合了所有选项卡的条件进行调用
+    // 因此可以使用子传父，将当前整合的参数对象传入到父组件中的调用方法中，请求所有符合条件的房源数据
+    this.props.fnGetHouses(paramsData)
   }
 
   componentDidMount () {
@@ -427,11 +436,170 @@ class Filter extends Component {
 const WithTopbar = withRouter(Topbar)
 
 class Houselist extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      currentCityInfo: store.getState(),
+      housesList: [],
+      housesCount: 0,
+      // 服务器数据是否加载完毕
+      isFinished: false
+    }
+  }
+
+  componentDidMount () {
+    this.fnGetHouses()
+  }
+
+  // 请求房源数据(params是子组件传输过来的筛选条件数据)
+  fnGetHouses = async params => {
+    let { currentCityInfo } = this.state
+
+    Toast.loading('加载中...')
+    // 将子组件传输过来的params数据绑定到this中，方便后续react-virtualized的infiniteLoader方法使用
+    this.params = params
+    let res = await this.$request({
+      url: '/houses',
+      params: {
+        cityId: currentCityInfo.value,
+        start: 1,
+        end: 20,
+        ...params
+      }
+    })
+
+    Toast.hide()
+
+    this.setState(
+      {
+        housesList: res.body.list,
+        housesCount: res.body.count,
+        isFinished: true
+      },
+      () => {
+        // 当筛选条件发生变更后，重新请求服务器数据时，列表渲染数据会重新从第一行开始
+        this.list.scrollToRow(0)
+      }
+    )
+  }
+
+  // react-virtualized的List列表
+  rowRenderer = ({ key, index, style }) => {
+    let houseItem = this.state.housesList[index]
+    // debugger
+
+    // 一开始无法获取到服务器返回的数据会报错
+    // 解决方法：条件判断服务器数据未返回之前，使用临时的JSX结构进行渲染（常见使用loading文字提示用户等待加载）
+    if (!houseItem) {
+      return (
+        <div className='reload' key={key} style={style}>
+          <div>loading....</div>
+        </div>
+      )
+    }
+
+    // 当服务器数据回来之后，就会加载正常渲染的数据，放弃上面临时替代的JSX结构
+    return (
+      <div className='house_wrap' key={key} style={style}>
+        <div className='house_item'>
+          <div className='imgWrap'>
+            <img
+              className='img'
+              src={BASEURL + houseItem.houseImg}
+              alt={houseItem.houseImg}
+            />
+          </div>
+          <div className='content'>
+            <h3 className='title'>{houseItem.title}</h3>
+            <div className='desc'>{houseItem.desc}</div>
+            <div>
+              {houseItem.tags.map((v, i) => (
+                <span className={`tag tag${i}`} key={i}>
+                  {v}
+                </span>
+              ))}
+            </div>
+            <div className='price'>
+              <span className='priceNum'>{houseItem.price}</span> 元/月
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // react-virtualized的infiniteLoader方法
+  // 是否加载当前行(当数据为空时，转成布尔值的false，就停止加载当前行)
+  isRowLoaded = ({ index }) => {
+    return !!this.state.housesList[index]
+  }
+  // 是否加载更多行（设置类似分页的起止、重新调用接口请求渲染列表、拼接新旧数组实现无限加载）
+  loadMoreRows = ({ startIndex, stopIndex }) => {
+    let { currentCityInfo } = this.state
+    return this.$request({
+      url: '/houses',
+      params: {
+        cityId: currentCityInfo.value,
+        start: startIndex,
+        end: stopIndex,
+        // params是子组件传输给当前组件的，
+        // 在当前组件不使用形参接收，而是通过绑定this再传入到当前方法中也是不错的选择
+        ...this.params
+      }
+    }).then(res => {
+      this.setState(state => {
+        // 拼接新旧数组，实现数据无限加载
+        // 两个扩展运算符展开，如果后面缺少一个扩展运算符会报错：map is not defined..
+        let nextPageList = [...state.housesList, ...res.body.list]
+        return {
+          housesList: nextPageList
+        }
+      })
+    })
+  }
+
   render () {
+    let { housesCount, housesList, isFinished } = this.state
     return (
       <div>
         <WithTopbar />
-        <Filter />
+        <Filter fnGetHouses={this.fnGetHouses} />
+        <div className='house_list_con'>
+          <InfiniteLoader
+            isRowLoaded={this.isRowLoaded}
+            loadMoreRows={this.loadMoreRows}
+            rowCount={housesCount}
+          >
+            {({ onRowsRendered, registerChild }) => (
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    height={height}
+                    rowCount={housesCount}
+                    rowHeight={120}
+                    rowRenderer={this.rowRenderer}
+                    width={width}
+                    onRowsRendered={onRowsRendered}
+                    ref={list => {
+                      // ref属性值传入函数的方式，技能满足组件取DOM又不影响调用InfiniteLoader组件中的registerChild()取DOM
+                      // 传入形参list （形参list就是当前组件）
+                      // 且将形参list绑定到组件的this.list中 后续可以直接this.list获取到当前List组件的DOM
+                      this.list = list
+                      // 调用InfiniteLoader组件中的registerChild()传入形参也可以通过该方法获取到当前List组件
+                      registerChild(list)
+                    }}
+                  />
+                )}
+              </AutoSizer>
+            )}
+          </InfiniteLoader>
+          {housesList.length === 0 && isFinished && (
+            <div className='notfound'>
+              <img src={notFound} alt='not-found' />
+              <p>没有找到房源，请你换个搜索条件吧~</p>
+            </div>
+          )}
+        </div>
       </div>
     )
   }
