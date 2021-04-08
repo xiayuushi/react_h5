@@ -8,8 +8,10 @@ import { List, AutoSizer, InfiniteLoader } from 'react-virtualized'
 import store from '../../store'
 import { BASEURL } from '../../utils/base_url'
 
-import City from '../city/city'
 import notFound from '../../asstes/images/not-found.png'
+
+// 导入抽取的公共组件
+import Switchcity from '../../components/switchcity/switchcity'
 
 // 头部搜索组件
 class Topbar extends Component {
@@ -19,27 +21,9 @@ class Topbar extends Component {
       currentCity: store.getState().label,
       switchCity: 'city_wrap'
     }
-    // 订阅redux中store修改，同步组件数据
-    this.unsubscribe = store.subscribe(this.fnStoreChange)
   }
-  // store修改后，组件再次更新数据
-  fnStoreChange = () => {
-    this.setState({
-      currentCity: store.getState().label
-    })
-  }
-  // 切换城市列表（父传子：弹出 + 子传父：关闭）
-  fnSwitchCityList = switchCity => {
-    this.setState({
-      switchCity
-    })
-  }
-  componentWillUnmount () {
-    // 组件销毁之前取消store订阅
-    this.unsubscribe()
-  }
+
   render () {
-    let { currentCity, switchCity } = this.state
     return (
       <div>
         <div className='list_title'>
@@ -47,23 +31,7 @@ class Topbar extends Component {
             className='back iconfont icon-prev'
             onClick={() => this.props.history.goBack()}
           ></span>
-          <div className='search_con'>
-            <span
-              className='city'
-              onClick={() => this.fnSwitchCityList('city_wrap slideUp')}
-            >
-              {currentCity}
-            </span>
-            <i className='iconfont icon-xialajiantouxiangxia'></i>
-            <span className='village'>
-              <i className='iconfont icon-fangdajing'></i> 请输入小区名
-            </span>
-            {/* City组件 */}
-            <City
-              switchCity={switchCity}
-              fnSwitchCityList={this.fnSwitchCityList}
-            />
-          </div>
+          <Switchcity />
           <i
             className='iconfont icon-ic-maplocation-o tomap'
             onClick={() => this.props.history.push('/map')}
@@ -128,6 +96,35 @@ class Filter extends Component {
       // 最后一个选项卡的渲染数据整合
       tagsFilterData: []
     }
+    // 订阅store修改
+    this.unsubscribe = store.subscribe(this.fnStoreChange)
+  }
+  // store通知组件更新数据
+  fnStoreChange = () => {
+    this.setState(
+      {
+        // 重新获取当前定位城市信息
+        currentCityInfo: store.getState()
+      },
+      () => {
+        this.fnGetFilterData()
+        // 重置筛选数据以及选项卡高亮状态
+        this.setState({
+          allFilterVal: {
+            area: ['area', 'null'],
+            mode: ['null'],
+            price: ['null'],
+            more: []
+          },
+          allFilterLightHeight: {
+            area: false,
+            mode: false,
+            price: false,
+            more: false
+          }
+        })
+      }
+    )
   }
   // 弹框显示
   fnShowPop = type => {
@@ -209,14 +206,52 @@ class Filter extends Component {
 
   // 查询当前城市的房源信息
   fnGetFilterData = async () => {
-    let res = await this.$request({
-      url: `/houses/condition?id=${this.state.currentCityInfo.value}`
-    })
+    let { currentCityInfo } = this.state
 
-    if (res.status === 200) {
-      this.setState({
-        allFilterData: res.body
+    // 使用缓存优化组件渲染：缓存有，取缓存数据，否则调接口请求
+    let haoke_filter_data = localStorage.getItem(
+      `haoke_filter_data_${currentCityInfo.value}`
+    )
+    // 当前组件房源信息
+    let allFilterData = {}
+
+    if (haoke_filter_data) {
+      allFilterData = JSON.parse(haoke_filter_data)
+    } else {
+      let res = await this.$request({
+        url: `/houses/condition?id=${currentCityInfo.value}`
       })
+      if (res.status === 200) {
+        allFilterData = res.body
+        // 存储当前房源信息到localStorage 以便优化组件渲染速度
+        localStorage.setItem(
+          `haoke_filter_data_${currentCityInfo.value}`,
+          JSON.stringify(allFilterData)
+        )
+        this.setState(
+          {
+            allFilterData
+          },
+          () => {
+            // 从所有过滤数据中拿出最后那个选项卡所需要的过滤数据
+            let {
+              roomType,
+              oriented,
+              floor,
+              characteristic
+            } = this.state.allFilterData
+            this.setState({
+              // 拼接成适合列表渲染的数组
+              tagsFilterData: [
+                { title: '户型', data: roomType },
+                { title: '朝向', data: oriented },
+                { title: '楼层', data: floor },
+                { title: '房屋亮点', data: characteristic }
+              ]
+            })
+          }
+        )
+      }
     }
   }
 
@@ -325,16 +360,20 @@ class Filter extends Component {
     paramsData.more = _allFilterVal.more.join()
     // console.log(paramsData)
 
-    // 关闭弹窗
-    this.fnHidePop()
-
     // 因为当前调用的接口与父组件中调用的接口是同一个，且当前是整合了所有选项卡的条件进行调用
     // 因此可以使用子传父，将当前整合的参数对象传入到父组件中的调用方法中，请求所有符合条件的房源数据
     this.props.fnGetHouses(paramsData)
+
+    // 关闭弹窗
+    this.fnHidePop()
   }
 
   componentDidMount () {
     this.fnGetFilterData()
+  }
+
+  componentWillUnmount () {
+    this.unsubscribe()
   }
 
   render () {
@@ -445,10 +484,25 @@ class Houselist extends Component {
       // 服务器数据是否加载完毕
       isFinished: false
     }
+    // 订阅redux中store修改
+    this.unsubscribe = store.subscribe(this.fnStoreChange)
   }
 
+  fnStoreChange = () => {
+    this.setState(
+      {
+        currentCityInfo: store.getState()
+      },
+      () => {
+        this.fnGetHouses()
+      }
+    )
+  }
   componentDidMount () {
     this.fnGetHouses()
+  }
+  componentWillUnmount () {
+    this.unsubscribe()
   }
 
   // 请求房源数据(params是子组件传输过来的筛选条件数据)

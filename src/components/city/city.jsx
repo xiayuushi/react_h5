@@ -68,7 +68,6 @@ class City extends Component {
     // 调用封装的方法处理服务器返回的源数据，生成符合渲染的新数据
     let { cityData, cityDataKey } = formatSourceData(all_city_list)
 
-
     // 请求热门城市数据
     let hot_city_list
     if (localStorage.getItem('hot_city_list')) {

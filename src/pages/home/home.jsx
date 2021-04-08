@@ -14,8 +14,8 @@ import { BASEURL } from '../../utils/base_url'
 // 导入redux进行数据共享
 import store from '../../store'
 
-// 导入城市组件
-import City from '../city/city'
+// 导入抽取的公共组件
+import Switchcity from '../../components/switchcity/switchcity'
 
 // 轮播图组件
 class Slide extends Component {
@@ -200,23 +200,8 @@ class SearchBar extends Component {
   constructor (props) {
     super(props)
     this.state = {
-      currentCity: '',
-      switchCity: 'city_wrap'
+      currentCity: ''
     }
-    // 订阅redux中store修改，同步组件数据
-    this.unsubscribe = store.subscribe(this.fnStoreChange)
-  }
-  // store修改后，组件再次更新数据
-  fnStoreChange = () => {
-    this.setState({
-      currentCity: store.getState().label
-    })
-  }
-  // 切换城市列表（父传子：弹出 + 子传父：关闭）
-  fnSwitchCityList = switchCity => {
-    this.setState({
-      switchCity
-    })
   }
 
   componentDidMount () {
@@ -262,35 +247,15 @@ class SearchBar extends Component {
     }
   }
   render () {
-    let { currentCity, switchCity } = this.state
     return (
       <div className='search_bar'>
-        <div className='search_con'>
-          <span
-            className='city'
-            onClick={() => this.fnSwitchCityList('city_wrap slideUp')}
-          >
-            {currentCity}
-          </span>
-          <i className='iconfont icon-xialajiantouxiangxia'></i>
-          <span className='village'>
-            <i className='iconfont icon-fangdajing'></i> 请输入小区名
-          </span>
-          <City
-            switchCity={switchCity}
-            fnSwitchCityList={this.fnSwitchCityList}
-          />
-        </div>
+        <Switchcity />
         <i
           className='iconfont icon-ic-maplocation-o tomap'
           onClick={() => this.props.history.push('/map')}
         ></i>
       </div>
     )
-  }
-  componentWillUnmount () {
-    // 组件销毁之前取消store订阅
-    this.unsubscribe()
   }
 }
 // 使用高阶组件让当前不参与路由跳转的组件也能够使用编程式导航跳转路由
