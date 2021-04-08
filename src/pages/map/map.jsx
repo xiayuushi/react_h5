@@ -216,7 +216,13 @@ class Map extends Component {
             </a>
           </div>
           {houseList.map(item => (
-            <div className='houseItems' key={item.houseCode}>
+            <div
+              className='houseItems'
+              key={item.houseCode}
+              onClick={() =>
+                this.props.history.push(`/detail/${item.houseCode}`)
+              }
+            >
               <div className='house'>
                 <div className='imgWrap'>
                   <img

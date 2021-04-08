@@ -555,7 +555,12 @@ class Houselist extends Component {
     // 当服务器数据回来之后，就会加载正常渲染的数据，放弃上面临时替代的JSX结构
     return (
       <div className='house_wrap' key={key} style={style}>
-        <div className='house_item'>
+        <div
+          className='house_item'
+          onClick={() =>
+            this.props.history.push(`/detail/${houseItem.houseCode}`)
+          }
+        >
           <div className='imgWrap'>
             <img
               className='img'
