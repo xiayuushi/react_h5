@@ -1,14 +1,83 @@
 import React, { Component } from 'react'
 import './detail.css'
-import detail_img from '../../asstes/images/detail.jpg'
-import map_img from '../../asstes/images/map.jpg'
+// import detail_img from '../../asstes/images/detail.jpg'
+// import map_img from '../../asstes/images/map.jpg'
 import avatar_img from '../../asstes/images/avatar.png'
+import { Carousel } from 'antd-mobile'
+import { BASEURL } from '../../utils/base_url'
+import { Link } from 'react-router-dom'
+
+// 从window对象中取出BMap对象
+const BMap = window.BMap
+// 自定义数据对应不同的iconfont
+const support_icon = {
+  电视: 'icon-dianshi',
+  热水器: 'icon-reshuiqi',
+  冰箱: 'icon-bingxiang',
+  天然气: 'icon-tianranqi',
+  空调: 'icon-kongtiao',
+  沙发: 'icon-shafa',
+  暖气: 'icon-nuanqi',
+  宽带: 'icon-_huabanfuben',
+  衣柜: 'icon-yigui',
+  洗衣机: 'icon-xiyiji'
+}
 
 class Detail extends Component {
+  state = {
+    houseDetail: {
+      // 对于需要遍历并渲染到页面的服务器数组数据，必须赋初始值，否则会报错 xxx is undefined
+      houseImg: [],
+      tags: [],
+      oriented: [],
+      supporting: []
+    }
+  }
   componentDidMount () {
-    console.log(this.props.match.params.key)
+    let id = this.props.match.params.key
+    this.fnGetHouseDetail(id)
+  }
+  fnGetHouseDetail = async id => {
+    let res = await this.$request({
+      url: `/houses/${id}`
+    })
+    console.log(res)
+    this.setState(
+      {
+        houseDetail: res.body
+      },
+      () => {
+        let { longitude, latitude } = this.state.houseDetail.coord
+        let map = new BMap.Map('container')
+        let point = new BMap.Point(longitude, latitude)
+        map.centerAndZoom(point, 22)
+        //开启鼠标滚轮缩放
+        map.enableScrollWheelZoom(true)
+        // 创建标记并显示
+        map.addOverlay(new BMap.Marker(point))
+      }
+    )
+
+    /* 
+    
+    body:
+        community: "观澜湖新城"
+        coord: {latitude: "19.917647", longitude: "110.328107"}
+        description: ""
+        floor: "中楼层"
+        houseCode: "5cc44e1c1439630e5b3d3482"
+        houseImg: (8) ["/newImg/7bjielo9b.jpg",]
+        oriented: ["南"]
+        price: 5000
+        roomType: "二室"
+        size: 57
+        supporting: []
+        tags: ["近地铁"]
+        title: "观澜湖新城 2室2厅 5000元"
+    */
   }
   render () {
+    let { houseDetail } = this.state
     return (
       <div>
         <span
@@ -17,36 +86,59 @@ class Detail extends Component {
         ></span>
 
         <div className='detail_slide_con'>
-          <ul>
-            <li>
-              <img src={detail_img} alt='' />
-            </li>
-          </ul>
+          {houseDetail.houseImg.length > 0 && (
+            <Carousel autoplay={true} infinite>
+              {houseDetail.houseImg.map(item => (
+                <Link
+                  key={item}
+                  to='/xxx'
+                  style={{
+                    display: 'inline-block',
+                    width: '100%',
+                    height: '10.375rem'
+                  }}
+                >
+                  <img
+                    src={BASEURL + item}
+                    alt=''
+                    style={{ width: '100%', verticalAlign: 'top' }}
+                    onLoad={() => {
+                      window.dispatchEvent(new Event('resize'))
+                      this.setState({ imgHeight: 'auto' })
+                    }}
+                  />
+                </Link>
+              ))}
+            </Carousel>
+          )}
         </div>
 
         <div className='detail_info'>
           <div className='detail_more'>
-            <h3>中海锦城 3室2厅 3400元</h3>
+            <h3>{houseDetail.title}</h3>
             <div className='detail_tag'>
-              <span className='tag tag0'>近地铁</span>
-              <span className='tag tag1'>近地铁</span>
-              <span className='tag tag2'>近地铁</span>
+              {houseDetail.tags.map((v, i) => (
+                <span className={'tag tag' + i} key={i}>
+                  {v}
+                </span>
+              ))}
             </div>
           </div>
 
           <ul className='detail_more more2'>
             <li>
               <span>
-                3400<em>/月</em>
+                {houseDetail.price}
+                <em>/月</em>
               </span>
               <b>租金</b>
             </li>
             <li>
-              <span>三室</span>
+              <span>{houseDetail.roomType}</span>
               <b>房型</b>
             </li>
             <li>
-              <span>113平米</span>
+              <span>{houseDetail.size}平米</span>
               <b>面积</b>
             </li>
           </ul>
@@ -55,10 +147,12 @@ class Detail extends Component {
               <em>装修：</em>精装
             </li>
             <li>
-              <em>楼层：</em>高楼层
+              <em>楼层：</em>
+              {houseDetail.floor}
             </li>
             <li>
-              <em>朝向：</em>南
+              <em>朝向：</em>
+              {houseDetail.oriented.join(' ')}
             </li>
             <li>
               <em>类型：</em>普通住宅
@@ -67,53 +161,19 @@ class Detail extends Component {
         </div>
 
         <div className='detail_info'>
-          <h4 className='detail_common_title'>银河城春晓苑</h4>
+          <h4 className='detail_common_title'>{houseDetail.community}</h4>
           <div className='map_con'>
-            <img src={map_img} alt='' />
+            <div id='container' style={{ width: '100%', height: '100%' }}></div>
           </div>
 
           <h3 className='detail_common_title'>房屋配套</h3>
           <ul className='support_list'>
-            <li>
-              <i className='iconfont icon-yigui'></i>
-              <b>衣柜</b>
-            </li>
-            <li>
-              <i className='iconfont icon-xiyiji'></i>
-              <b>洗衣机</b>
-            </li>
-            <li>
-              <i className='iconfont icon-kongtiao'></i>
-              <b>空调</b>
-            </li>
-            <li>
-              <i className='iconfont icon-tianranqi'></i>
-              <b>天然气</b>
-            </li>
-            <li>
-              <i className='iconfont icon-bingxiang'></i>
-              <b>冰箱</b>
-            </li>
-            <li>
-              <i className='iconfont icon-dianshi'></i>
-              <b>电视</b>
-            </li>
-            <li>
-              <i className='iconfont icon-reshuiqi'></i>
-              <b>热水器</b>
-            </li>
-            <li>
-              <i className='iconfont icon-shafa'></i>
-              <b>沙发</b>
-            </li>
-            <li>
-              <i className='iconfont icon-nuanqi'></i>
-              <b>暖气</b>
-            </li>
-            <li>
-              <i className='iconfont icon-_huabanfuben'></i>
-              <b>wifi</b>
-            </li>
+            {houseDetail.supporting.map((v, i) => (
+              <li>
+                <i className={'iconfont ' + support_icon[v]} key={i}></i>
+                <b>{v}</b>
+              </li>
+            ))}
           </ul>
         </div>
 
@@ -131,14 +191,7 @@ class Detail extends Component {
             </div>
             <span className='send_info'>发消息</span>
           </div>
-          <p className='detail_text'>
-            【房源亮点】
-            离小区200米就是家家乐超市，504米就是花莲超市，05公里莲塘一中，1.3公里就到维也纳购物广场。
-            【交通出行】 出小区234米就是万坊桥头公交站：515路
-            429米星港湾花园（新连武路口）公交站：127路；128路；河溪线；128路箭江闸线
-            【小区介绍】
-            小区建于2001年，70年产权商品房，客厅朝南通阳台，配套设施齐，交通便利。
-          </p>
+          <p className='detail_text'>{houseDetail.description}</p>
         </div>
 
         <ul className='down_btns'>
