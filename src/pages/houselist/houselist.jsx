@@ -221,6 +221,8 @@ class Filter extends Component {
       let res = await this.$request({
         url: `/houses/condition?id=${currentCityInfo.value}`
       })
+      console.log(res)
+
       if (res.status === 200) {
         allFilterData = res.body
         // 存储当前房源信息到localStorage 以便优化组件渲染速度
@@ -228,31 +230,31 @@ class Filter extends Component {
           `haoke_filter_data_${currentCityInfo.value}`,
           JSON.stringify(allFilterData)
         )
-        this.setState(
-          {
-            allFilterData
-          },
-          () => {
-            // 从所有过滤数据中拿出最后那个选项卡所需要的过滤数据
-            let {
-              roomType,
-              oriented,
-              floor,
-              characteristic
-            } = this.state.allFilterData
-            this.setState({
-              // 拼接成适合列表渲染的数组
-              tagsFilterData: [
-                { title: '户型', data: roomType },
-                { title: '朝向', data: oriented },
-                { title: '楼层', data: floor },
-                { title: '房屋亮点', data: characteristic }
-              ]
-            })
-          }
-        )
       }
     }
+    this.setState(
+      {
+        allFilterData
+      },
+      () => {
+        // 从所有过滤数据中拿出最后那个选项卡所需要的过滤数据
+        let {
+          roomType,
+          oriented,
+          floor,
+          characteristic
+        } = this.state.allFilterData
+        this.setState({
+          // 拼接成适合列表渲染的数组
+          tagsFilterData: [
+            { title: '户型', data: roomType },
+            { title: '朝向', data: oriented },
+            { title: '楼层', data: floor },
+            { title: '房屋亮点', data: characteristic }
+          ]
+        })
+      }
+    )
   }
 
   // 存储前三个选项卡（PickerView级联选择器）选中的值

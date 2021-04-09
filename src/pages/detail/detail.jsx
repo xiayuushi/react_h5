@@ -41,7 +41,6 @@ class Detail extends Component {
     let res = await this.$request({
       url: `/houses/${id}`
     })
-    console.log(res)
     this.setState(
       {
         houseDetail: res.body
@@ -57,24 +56,6 @@ class Detail extends Component {
         map.addOverlay(new BMap.Marker(point))
       }
     )
-
-    /* 
-    
-    body:
-        community: "观澜湖新城"
-        coord: {latitude: "19.917647", longitude: "110.328107"}
-        description: ""
-        floor: "中楼层"
-        houseCode: "5cc44e1c1439630e5b3d3482"
-        houseImg: (8) ["/newImg/7bjielo9b.jpg",]
-        oriented: ["南"]
-        price: 5000
-        roomType: "二室"
-        size: 57
-        supporting: []
-        tags: ["近地铁"]
-        title: "观澜湖新城 2室2厅 5000元"
-    */
   }
   render () {
     let { houseDetail } = this.state
