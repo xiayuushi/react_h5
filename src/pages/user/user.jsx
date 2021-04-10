@@ -11,7 +11,12 @@ class User extends Component {
           <div className='info_pannel'>
             <img src={avatar02} alt='' />
             <div className='role'>游客</div>
-            <span className='gologin'>去登录</span>
+            <span
+              className='gologin'
+              onClick={() => this.props.history.push('/login')}
+            >
+              去登录
+            </span>
           </div>
         </div>
         <ul className='opt_list'>

@@ -150,8 +150,8 @@ class Detail extends Component {
           <h3 className='detail_common_title'>房屋配套</h3>
           <ul className='support_list'>
             {houseDetail.supporting.map((v, i) => (
-              <li>
-                <i className={'iconfont ' + support_icon[v]} key={i}></i>
+              <li key={i}>
+                <i className={'iconfont ' + support_icon[v]}></i>
                 <b>{v}</b>
               </li>
             ))}
