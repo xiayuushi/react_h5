@@ -39,7 +39,7 @@ const Login = props => {
     <div className={styles.login_wrap}>
       <span
         className={[styles.back, 'iconfont', 'icon-prev'].join(' ')}
-        onClick={() => this.props.history.goBack()}
+        onClick={() => props.history.goBack()}
       ></span>
       <div className={styles.login_title}>
         <img src={login_title} alt='login' />
@@ -92,7 +92,7 @@ const Login = props => {
 // st2、使用HOC生成新的组件
 const WithLogin = withFormik({
   // st4、映射state中的数据到props属性上
-  mapPropsToValues: () => ({ username: '', password: '' }),
+  mapPropsToValues: () => ({ username: 'test2', password: 'test2' }),
   // st8、配合正则表达式验证state中input表单的字段
   validationSchema: Yup.object({
     username: Yup.string()
@@ -116,7 +116,7 @@ const WithLogin = withFormik({
     if (status === 200) {
       Toast.success(description, 1, () => {
         // 存储token到本地
-        localStorage.setItem('haoke_token', JSON.stringify(body))
+        localStorage.setItem('haoke_token', JSON.stringify(body.token))
         // 返回之前的页面
         props.history.goBack()
       })
