@@ -1,0 +1,181 @@
+.info_con {
+  background-color: #fff;
+  padding: 0 .75rem;
+  color: #666;
+}
+
+.title_con {
+  margin: 0;
+  padding: .9rem 0;
+  font-size: .9rem;
+  color: #35ac7d;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.common_con {
+  padding: .75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.community {
+  padding-right: .25rem;
+}
+
+.flex_con {
+  display: flex;
+  justify-content: space-between;
+}
+
+.flex_con .sub_title {
+  width: 6rem;
+}
+
+.flex_con input {
+  flex: 1;
+  border: 0;
+  color: hsl(0, 0%, 46%);
+}
+
+input::-webkit-input-placeholder {
+  color: #ccc;
+}
+
+.rent_con .am-list-item {
+  color: #666;
+  padding-left: 0;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rent_con .am-list-item .am-list-line {
+  padding-right: 0;
+}
+
+.rent_con .am-list-item .am-list-line .am-list-content,
+.rent_con .am-list-item .am-list-line .am-list-extra {
+  padding: .75rem 0;
+  line-height: 0;
+  font-size: .7rem;
+  color: #666;
+}
+
+.sub_title_con {
+  margin: 0;
+  padding: .9rem 0;
+  font-size: .8rem;
+  color: #626262;
+  font-weight: 700;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.rent_con .am-list-item .am-input-control input {
+  font-size: 14px;
+  color: #666;
+}
+
+.rent_con .support_list {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.rent_con .icon_con {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 20%;
+  padding: .25rem 0;
+}
+
+.rent_con .am-textarea-control textarea {
+  font-size: .7rem;
+}
+
+.textarea_con {
+  margin-bottom: 2.9rem;
+}
+
+.rent_con .button_con {
+  position: fixed;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+}
+
+.rent_con .cancel,
+.rent_con .sure {
+  width: 50%;
+  border: none;
+  line-height: 2.4rem;
+  font-size: .8rem;
+  cursor: pointer;
+}
+
+.rent_con .cancel {
+  background-color: #fff;
+}
+
+.rent_con .sure,
+.rent_con .search_cancel {
+  background-color: #23ad6e;
+  color: #fff;
+}
+
+
+.search_pannel_con {
+  position: fixed;
+  left: 0;
+  top: 100%;
+  width: 100%;
+  height: 100%;
+  background-color: #f1f1f1;
+  transition: top 800ms ease;
+  z-index: 999;
+}
+
+.search_pannel_con.show_pannel {
+  top: 0
+}
+
+.rent_con .search_top_con {
+  display: flex;
+  height: 2.5rem;
+  padding: 0 .425rem;
+  box-sizing: border-box;
+}
+
+.search_top_con .am-list-item .am-input-control input {
+  font-size: .7rem;
+}
+
+.search_top_con .am-list-item.am-input-item {
+  flex: 1;
+  height: 100%;
+}
+
+.rent_con .search_cancel {
+  width: 3.55rem;
+  line-height: 2.5rem;
+  border: none;
+  font-size: .7rem;
+}
+
+.search_list_con {
+  position: absolute;
+  left: 0;
+  top: 2.5rem;
+  bottom: 0;
+  width: 100%;
+  padding: .25rem .425rem;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+.search_list_con li {
+  width: 100%;
+  line-height: 2.5rem;
+  color: #666;
+  font-size: .7rem;
+  border-bottom: 1px solid #f0f0f0;
+}

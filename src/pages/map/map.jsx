@@ -4,6 +4,7 @@ import './map.css'
 import store from '../../store'
 import { BASEURL } from '../../utils/base_url'
 import { Toast } from 'antd-mobile'
+import Toptitle from '../../components/toptitle/toptitle'
 
 // 从window取出BMap对象，以便在当前组件全局使用
 const BMap = window.BMap
@@ -196,13 +197,14 @@ class Map extends Component {
     return (
       <div>
         {/* 顶部 */}
-        <div className='common_title'>
+        {/* <div className='common_title'>
           <span
             className='back iconfont icon-prev'
             onClick={() => this.props.history.goBack()}
           ></span>
           <h3>地图找房</h3>
-        </div>
+        </div> */}
+        <Toptitle title='地图找房' history={this.props.history} />
         {/* 地图 */}
         <div className='map_com'>
           <div id='container' style={{ width: '100%', height: '100%' }}></div>

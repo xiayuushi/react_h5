@@ -97,7 +97,7 @@ function Menu () {
         <h4>地图找房</h4>
       </li>
       <li>
-        <Link to='/layout/home/xxx'>
+        <Link to='/rent'>
           <i className='iconfont icon-zufang'></i>
         </Link>
         <h4>去出租</h4>

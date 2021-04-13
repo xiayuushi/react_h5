@@ -1,4 +1,4 @@
-.common_title {
+/* .common_title {
   height: 2.5rem;
   background-color: #f9f9f9;
   position: relative;
@@ -22,7 +22,7 @@
   height: 1rem;
   font-size: 1.2rem;
   color: #8f949b;
-}
+} */
 .map_com {
   position: fixed;
   width: 100%;
@@ -32,6 +32,7 @@
   background-color: #f0f0f0;
   z-index: 900;
 }
+
 .map_label01 {
   color: #fff;
   font-size: 14px;
@@ -47,6 +48,7 @@
   justify-content: center;
   border-radius: 35px;
 }
+
 .map_label02 {
   color: #fff;
   font-size: 14px;
@@ -112,8 +114,8 @@
   z-index: 999;
   box-sizing: border-box;
   overflow: hidden;
-  display:flex;
-  flex-direction:column;
+  display: flex;
+  flex-direction: column;
 }
 
 .houseListShow {
@@ -153,8 +155,8 @@
 .houseItems {
   padding: 0 10px;
   overflow-y: auto;
-  height:80%;
-  flex-grow:1;
+  height: 80%;
+  flex-grow: 1;
 }
 
 .house {
@@ -165,15 +167,18 @@
   padding-top: 18px;
   border-bottom: 1px solid #e5e5e5;
 }
+
 .imgWrap {
   float: left;
   width: 106px;
   height: 80px;
 }
+
 .img {
   width: 106px;
   height: 80px;
 }
+
 .content {
   overflow: hidden;
   padding-left: 12px;
@@ -216,26 +221,32 @@
   margin-right: 5px;
   line-height: 12px;
 }
+
 .tag0 {
   color: #39becd;
   background: #e1f5f8;
 }
+
 .tag1 {
   color: #3fc28c;
   background: #e1f5ed;
 }
+
 .tag2 {
   color: #5aabfd;
   background: #e6f2ff;
 }
+
 .tag3 {
   color: #39becd;
   background: #e1f5f8;
 }
+
 .tag4 {
   color: #3fc28c;
   background: #e1f5ed;
 }
+
 .tag5 {
   color: #5aabfd;
   background: #e6f2ff;
