@@ -33,7 +33,7 @@ const Login = props => {
   // st10、给input表单绑定onBlur事件关联handleBlur方法，之后就可以使用touched得到是否操作过对应的表单
   // 注意:这个touched就如字面意思,它仅仅是感知是否对表单操作过,它无法知道Yup验证的结果是否正确
   // 也就是说,操作了表单 touched的值就是true 否则就是false
-  console.log(touched)
+  // console.log(touched)
 
   return (
     <div className={styles.login_wrap}>
@@ -116,7 +116,7 @@ const WithLogin = withFormik({
     if (status === 200) {
       Toast.success(description, 1, () => {
         // 存储token到本地
-        localStorage.setItem('haoke_token', JSON.stringify(body.token))
+        localStorage.setItem('haoke_token', body.token)
         // 返回之前的页面
         props.history.goBack()
       })

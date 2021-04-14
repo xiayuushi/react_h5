@@ -88,6 +88,13 @@ input::-webkit-input-placeholder {
   padding: .25rem 0;
 }
 
+/* 当.icon_con有.active类时 其子元素添加上color样式 */
+.rent_con .icon_con.active i,
+.rent_con .icon_con.active span {
+  color: #f00;
+}
+
+
 .rent_con .am-textarea-control textarea {
   font-size: .7rem;
 }
@@ -178,4 +185,8 @@ input::-webkit-input-placeholder {
   color: #666;
   font-size: .7rem;
   border-bottom: 1px solid #f0f0f0;
+}
+
+.add_support_active {
+  color: #080;
 }

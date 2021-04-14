@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
 import './rent.css'
 import Toptitle from '../../components/toptitle/toptitle'
-import { Picker, List, InputItem, ImagePicker, TextareaItem } from 'antd-mobile'
+import {
+  Picker,
+  List,
+  InputItem,
+  ImagePicker,
+  TextareaItem,
+  Toast
+} from 'antd-mobile'
 import store from '../../store'
 
 // 级联选择器数据
@@ -47,18 +54,6 @@ const oSupport = [
   { key: '宽带', sClass: 'iconfont icon-_huabanfuben' }
 ]
 
-// 图片上传
-const data = [
-  {
-    url: 'https://zos.alipayobjects.com/rmsportal/PZUUCKTRIHWiZSY.jpeg',
-    id: '2121'
-  },
-  {
-    url: 'https://zos.alipayobjects.com/rmsportal/hqQWgTXdrlmVVYi.jpeg',
-    id: '2122'
-  }
-]
-
 class Rent extends Component {
   constructor (props) {
     super(props)
@@ -66,12 +61,19 @@ class Rent extends Component {
       currentCityInfo: store.getState(),
       price: '',
       size: '',
+      roomType: [],
+      floor: [],
+      oriented: [],
       searchKeyWords: '',
-      houseTitle: '',
-      files: data,
-      multiple: false,
+      title: '',
+      houseImg: [],
+      multiple: true,
+      // 用于过滤当前选中的图标的数组
+      supportList: [],
+      description: '',
       toggleClass: 'search_pannel_con',
-      communityList: []
+      communityList: [],
+      community: ''
     }
   }
 
@@ -85,6 +87,14 @@ class Rent extends Component {
   // InputItem表单的双向数据绑定
   // 考虑到组件中使用到了多个InputItem，因此需要改造其方法便于通用，简化代码量
   fnInputItemChange = (val, key) => {
+    this.setState({
+      [key]: val
+    })
+  }
+
+  // Picker组件的双向数据绑定
+  // 考虑到组件中使用到了多个Picker，因此需要改造其方法便于通用，简化代码量
+  fnPickerChange = (val, key) => {
     this.setState({
       [key]: val
     })
@@ -111,23 +121,126 @@ class Rent extends Component {
   selectedCommunity = v => {
     this.setState(
       {
-        searchKeyWords: v.communityName
+        searchKeyWords: v.communityName,
+        community: v.community
       },
       this.fnOpenPannel()
     )
   }
 
-  // 图片上传相关方法
-  onChange = (files, type, index) => {
-    console.log(files, type, index)
+  // 发布房源
+  releaseHouse = async () => {
+    // 解构接口参数所需的值
+    let {
+      title,
+      description,
+      houseImg,
+      oriented,
+      supportList,
+      price,
+      roomType,
+      size,
+      floor,
+      community
+    } = this.state
+
+    // 必须发布房源图片才能进行后续接口请求
+    if (supportList.length === 0) {
+      Toast.info('请先上传房屋图片！')
+      return
+    }
+
+    // 图片上传接口
+    // 调用此接口将 base64格式转成图片路径 /uploads/xxx.jpg
+    // 创建FormData对象用于参数拼接
+    let fd = new FormData()
+
+    // 拼接参数
+    houseImg.map(v => fd.append('file', v.file))
+
+    // 上传房源图片
+    let upLoadRes = await this.$request({
+      url: '/houses/image',
+      method: 'post',
+      data: fd
+    })
+
+    if (upLoadRes.status === 200) {
+      // 将上传的图片数据转成接口所需要的格式
+      let houseImg = upLoadRes.body.join('|')
+
+      // 将选中图标与文字转成接口所需要的格式
+      let supporting = supportList.join('|')
+
+      // 将参数数据转成符合接口要求的形式
+      oriented = oriented[0]
+      roomType = roomType[0]
+      floor = floor[0]
+
+      // 获取token 携带在请求头
+      let token = localStorage.getItem('haoke_token')
+
+      // 发布房源
+      let res = await this.$request({
+        url: '/user/houses',
+        method: 'post',
+        headers: {
+          authorization: token
+        },
+        data: {
+          title,
+          description,
+          houseImg,
+          oriented,
+          supporting,
+          price,
+          roomType,
+          size,
+          floor,
+          community
+        }
+      })
+
+      if (res.status === 200) {
+        Toast.success('发布成功！', 2, () => {
+          this.props.history.push('/rentlist')
+        })
+      } else {
+        Toast.fail('发布失败，请稍后再试！', 2)
+      }
+    }
+  }
+
+  // ImagePicker图片上传相关方法
+  onImagePickerChange = files => {
     this.setState({
-      files
+      houseImg: files
     })
   }
-  onSegChange = e => {
-    const index = e.nativeEvent.selectedSegmentIndex
+
+  // 点击图标添加/移除样式
+  toggleSupport = v => {
+    this.setState(state => {
+      // 复制一份state中的数组
+      // let _supportList = JSON.parse(JSON.stringify(state.supportList))
+      let _supportList = [...state.supportList]
+      // 判断，有则剔除、无则添加
+      if (_supportList.includes(v)) {
+        _supportList = _supportList.filter(item => item !== v)
+      } else {
+        _supportList.push(v)
+      }
+      // 返回数据并重新设置state中的数组
+      return {
+        supportList: _supportList
+      }
+    })
+  }
+
+  // TextareaItem双向数据绑定
+  fnChangeTextareaItem = v => {
     this.setState({
-      multiple: index === 1
+      description: v
     })
   }
 
@@ -147,11 +260,19 @@ class Rent extends Component {
   }
   render () {
     const {
-      files,
+      price,
+      size,
+      roomType,
+      floor,
+      oriented,
+      houseImg,
       toggleClass,
       communityList,
       searchKeyWords,
-      houseTitle
+      title,
+      multiple,
+      supportList,
+      description
     } = this.state
 
     return (
@@ -172,7 +293,7 @@ class Rent extends Component {
             <input
               type='text'
               placeholder='请输入租金/月'
-              value={this.state.price}
+              value={price}
               name='price'
               onChange={this.fnOnChange}
             />
@@ -184,7 +305,7 @@ class Rent extends Component {
             <input
               type='text'
               placeholder='请输入租金/月'
-              value={this.state.size}
+              value={size}
               name='size'
               onChange={this.fnOnChange}
             />
@@ -197,7 +318,8 @@ class Rent extends Component {
             cascade={true}
             cols={1}
             extra='请选择'
-            value={this.state.sValue}
+            value={roomType}
+            onChange={val => this.fnPickerChange(val, 'roomType')}
           >
             <List.Item arrow='horizontal'>户型</List.Item>
           </Picker>
@@ -208,7 +330,8 @@ class Rent extends Component {
             cascade={true}
             cols={1}
             extra='请选择'
-            value={this.state.sValue}
+            value={floor}
+            onChange={val => this.fnPickerChange(val, 'floor')}
           >
             <List.Item arrow='horizontal'>所在楼层</List.Item>
           </Picker>
@@ -219,7 +342,8 @@ class Rent extends Component {
             cascade={true}
             cols={1}
             extra='请选择'
-            value={this.state.sValue}
+            value={oriented}
+            onChange={val => this.fnPickerChange(val, 'oriented')}
           >
             <List.Item arrow='horizontal'>朝向</List.Item>
           </Picker>
@@ -227,24 +351,30 @@ class Rent extends Component {
           <h3 className='sub_title_con'>房屋标题</h3>
           <InputItem
             placeholder='请输入房屋标题'
-            value={houseTitle}
-            onChange={val => this.fnInputItemChange(val, 'houseTitle')}
+            value={title}
+            onChange={val => this.fnInputItemChange(val, 'title')}
           />
 
           <h3 className='sub_title_con'>房屋图像</h3>
           <ImagePicker
-            files={files}
-            onChange={this.onChange}
-            onImageClick={(index, fs) => console.log(index, fs)}
-            selectable={files.length < 7}
-            multiple={this.state.multiple}
+            files={houseImg}
+            onChange={files => this.onImagePickerChange(files)}
+            multiple={multiple}
           />
 
           <h3 className='sub_title_con'>房屋配套</h3>
           <div className='support_list'>
             {oSupport.map((v, i) => (
-              <div className='icon_con' key={i}>
-                <i className={'iconfont ' + v.sClass}></i>
+              <div
+                className={
+                  supportList.includes(v.key) ? 'icon_con active' : 'icon_con'
+                }
+                key={i}
+                onClick={() => {
+                  this.toggleSupport(v.key)
+                }}
+              >
+                <i className={v.sClass}></i>
                 <span>{v.key}</span>
               </div>
             ))}
@@ -253,16 +383,22 @@ class Rent extends Component {
           <h3 className='sub_title_con'>房屋描述</h3>
           <div className='textarea_con'>
             <TextareaItem
+              value={description}
               rows={5}
               placeholder='请输入房屋描述信息'
               autoHeight
+              onChange={val => {
+                this.fnChangeTextareaItem(val)
+              }}
             />
           </div>
         </div>
 
         <div className='button_con'>
           <button className='cancel'>取消</button>
-          <button className='sure'>确定</button>
+          <button className='sure' onClick={this.releaseHouse}>
+            确定
+          </button>
         </div>
 
         {/* 隐藏的搜索面板 */}

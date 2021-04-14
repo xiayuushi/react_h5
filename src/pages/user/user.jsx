@@ -29,7 +29,7 @@ class User extends Component {
         url: '/user',
         headers: {
           accept: 'application/json',
-          authorization: JSON.parse(token)
+          authorization: token
         }
       })
       // 请求成功将用户信息存储到localStorage并渲染用户信息
