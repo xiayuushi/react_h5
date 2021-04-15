@@ -177,16 +177,10 @@ class Rent extends Component {
       roomType = roomType[0]
       floor = floor[0]
 
-      // 获取token 携带在请求头
-      let token = localStorage.getItem('haoke_token')
-
       // 发布房源
       let res = await this.$request({
         url: '/user/houses',
         method: 'post',
-        headers: {
-          authorization: token
-        },
         data: {
           title,
           description,

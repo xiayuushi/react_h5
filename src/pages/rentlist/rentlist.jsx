@@ -58,9 +58,6 @@ class Rentlist extends Component {
   }
   // 查看已发布的房源列表
   fnGetUserHousesList = async () => {
-    // 请求必须携带token
-    let token = localStorage.getItem('haoke_token')
-
     // 有缓存从缓存取 否则发请求
     let haoke_userhouseslist = localStorage.getItem('haoke_userhouseslist')
     let userRentList = {}
@@ -68,10 +65,7 @@ class Rentlist extends Component {
       userRentList = JSON.parse(haoke_userhouseslist)
     } else {
       let res = await this.$request({
-        url: '/user/houses',
-        headers: {
-          authorization: token
-        }
+        url: '/user/houses'
       })
 
       if (res.status === 200) {

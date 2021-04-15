@@ -21,26 +21,20 @@ class User extends Component {
 
   // 获取用户信息
   getUserInfo = async () => {
-    // 从缓存取token
-    let token = localStorage.getItem('haoke_token')
-    // 有token则携带在请求头发请求
-    if (token) {
-      let res = await this.$request({
-        url: '/user',
-        headers: {
-          accept: 'application/json',
-          authorization: token
-        }
-      })
-      // 请求成功将用户信息存储到localStorage并渲染用户信息
-      if (res.status === 200) {
-        localStorage.setItem('userInfo', JSON.stringify(res.body))
-
-        this.setState({
-          userInfo: res.body,
-          isLogin: true
-        })
+    let res = await this.$request({
+      url: '/user',
+      headers: {
+        accept: 'application/json'
       }
+    })
+    // 请求成功将用户信息存储到localStorage并渲染用户信息
+    if (res.status === 200) {
+      localStorage.setItem('userInfo', JSON.stringify(res.body))
+
+      this.setState({
+        userInfo: res.body,
+        isLogin: true
+      })
     }
   }
 
@@ -61,7 +55,7 @@ class User extends Component {
     return (
       <div className='user_wrap'>
         <div className='user_header'>
-          {/* 根据用户是否登录，显示不同的按钮 */}
+          {/* 根据用户是否登录，显示不同的按钮，处理不同的逻辑 */}
           {isLogin ? (
             <div className='info_pannel'>
               <img src={BASEURL + userInfo.avatar} alt='' />
@@ -88,7 +82,7 @@ class User extends Component {
             <i className='iconfont icon-shoucang'></i>
             <span>我的收藏</span>
           </li>
-          <li onClick={()=>this.props.history.push('/rentlist')}>
+          <li onClick={() => this.props.history.push('/rentlist')}>
             <i className='iconfont icon-home'></i>
             <span>我的出租</span>
           </li>
