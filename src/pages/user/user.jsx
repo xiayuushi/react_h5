@@ -88,7 +88,7 @@ class User extends Component {
             <i className='iconfont icon-shoucang'></i>
             <span>我的收藏</span>
           </li>
-          <li>
+          <li onClick={()=>this.props.history.push('/rentlist')}>
             <i className='iconfont icon-home'></i>
             <span>我的出租</span>
           </li>

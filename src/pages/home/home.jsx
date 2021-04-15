@@ -31,6 +31,8 @@ class Slide extends Component {
     let res = await this.$request({
       url: '/home/swiper'
     })
+    console.log(res)
+
     if (res.status === 200) {
       this.setState({
         carouselData: res.body
