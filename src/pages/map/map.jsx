@@ -197,13 +197,6 @@ class Map extends Component {
     return (
       <div>
         {/* 顶部 */}
-        {/* <div className='common_title'>
-          <span
-            className='back iconfont icon-prev'
-            onClick={() => this.props.history.goBack()}
-          ></span>
-          <h3>地图找房</h3>
-        </div> */}
         <Toptitle title='地图找房' history={this.props.history} />
         {/* 地图 */}
         <div className='map_com'>

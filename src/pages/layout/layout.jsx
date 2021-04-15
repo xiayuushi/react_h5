@@ -36,31 +36,14 @@ class Layout extends Component {
         <footer>
           <ul>
             {/* 使用自定义路由替换之前的Link标签 */}
-            <CustomLink label='首页' to='/layout/home'  iconClass='icon-home1' />
-            <CustomLink label="找房" to="/layout/houselist"  iconClass="icon-ziyuan" />
-            <CustomLink label="资讯" to="/layout/info"  iconClass="icon-zixun" />
-            <CustomLink label="我的" to="/layout/user"  iconClass="icon-wode" />
-
-            {/* 以下是之前的Link标签 */}
-            {/* <li className='active'>
-              <Link to='/layout/home' className='iconfont icon-home1'></Link>
-              <h4>首页</h4>
-            </li>
-            <li>
-              <Link
-                to='/layout/houselist'
-                className='iconfont icon-ziyuan'
-              ></Link>
-              <h4>找房</h4>
-            </li>
-            <li>
-              <Link to='/layout/info' className='iconfont icon-zixun'></Link>
-              <h4>资讯</h4>
-            </li>
-            <li>
-              <Link to='/layout/user' className='iconfont icon-wode'></Link>
-              <h4>我的</h4>
-            </li> */}
+            <CustomLink label='首页' to='/layout/home' iconClass='icon-home1' />
+            <CustomLink
+              label='找房'
+              to='/layout/houselist'
+              iconClass='icon-ziyuan'
+            />
+            <CustomLink label='资讯' to='/layout/info' iconClass='icon-zixun' />
+            <CustomLink label='我的' to='/layout/user' iconClass='icon-wode' />
           </ul>
         </footer>
       </div>

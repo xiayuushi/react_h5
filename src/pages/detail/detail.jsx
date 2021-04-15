@@ -1,9 +1,7 @@
 import React, { Component } from 'react'
 import './detail.css'
-// import detail_img from '../../asstes/images/detail.jpg'
-// import map_img from '../../asstes/images/map.jpg'
 import avatar_img from '../../asstes/images/avatar.png'
-import { Carousel } from 'antd-mobile'
+import { Carousel, Toast } from 'antd-mobile'
 import { BASEURL } from '../../utils/base_url'
 import { Link } from 'react-router-dom'
 
@@ -26,18 +24,24 @@ const support_icon = {
 class Detail extends Component {
   state = {
     houseDetail: {
-      // 对于需要遍历并渲染到页面的服务器数组数据，必须赋初始值，否则会报错 xxx is undefined
+      // 对于需要遍历并渲染到页面的服务器数组数据
+      // 必须赋初始值，否则会报错 xxx is undefined
       houseImg: [],
       tags: [],
       oriented: [],
       supporting: []
-    }
+    },
+    // 是否已将房屋添加收藏
+    isHouseFavourite: false
   }
   componentDidMount () {
-    let id = this.props.match.params.key
-    this.fnGetHouseDetail(id)
+    this.fnGetHouseDetail()
+    this.fnCheckFavourite()
   }
-  fnGetHouseDetail = async id => {
+
+  // 获取当前房源详情
+  fnGetHouseDetail = async () => {
+    let id = this.props.match.params.key
     let res = await this.$request({
       url: `/houses/${id}`
     })
@@ -50,15 +54,65 @@ class Detail extends Component {
         let map = new BMap.Map('container')
         let point = new BMap.Point(longitude, latitude)
         map.centerAndZoom(point, 22)
-        //开启鼠标滚轮缩放
+        // 开启鼠标滚轮缩放
         map.enableScrollWheelZoom(true)
         // 创建标记并显示
         map.addOverlay(new BMap.Marker(point))
       }
     )
   }
+
+  // 查看当前房源是否收藏
+  fnCheckFavourite = async () => {
+    let id = this.props.match.params.key
+    let res = await this.$request({
+      url: `/user/favorites/${id}`
+    })
+    let { status, body } = res
+    if (status === 200) {
+      this.setState({
+        isHouseFavourite: body.isFavorite
+      })
+    }
+  }
+
+  // 添加收藏
+  addCollect = async () => {
+    let id = this.props.match.params.key
+    let res = await this.$request({
+      url: `/user/favorites/${id}`,
+      method: 'post'
+    })
+    let { status } = res
+    if (status === 200) {
+      Toast.success('收藏成功！', 1, () => {
+        // 再查看一次是否收藏，因为收藏与否是与房源id相关
+        // 因此重新查看当前房源是否已被收藏即可，无需我们手动将state中的isHouseFavourite进行更改
+        this.fnCheckFavourite()
+      })
+    } else {
+      // 游客也有权限查看房屋详情页面，但是收藏必须先登录
+      Toast.fail('请先登录后再操作！', 1)
+    }
+  }
+
+  // 取消当前房源的收藏
+  removeCollect = async () => {
+    // 从路由中获取房源id
+    let id = this.props.match.params.key
+    let res = await this.$request({
+      url: `/user/favorites/${id}`,
+      method: 'delete'
+    })
+    let { status } = res
+    if (status === 200) {
+      Toast.success('已取消收藏！', 1, () => {
+        this.fnCheckFavourite()
+      })
+    }
+  }
   render () {
-    let { houseDetail } = this.state
+    let { houseDetail, isHouseFavourite } = this.state
     return (
       <div>
         <span
@@ -176,9 +230,17 @@ class Detail extends Component {
         </div>
 
         <ul className='down_btns'>
-          <li className='collect'>
-            <i className='iconfont icon-shoucang'></i> 收藏
-          </li>
+          {/* 根据收藏情况进行互斥条件渲染 */}
+          {isHouseFavourite ? (
+            <li className='collected' onClick={this.removeCollect}>
+              <i className='iconfont icon-shoucang'></i> 已收藏
+            </li>
+          ) : (
+            <li className='collect' onClick={this.addCollect}>
+              <i className='iconfont icon-shoucang'></i> 收藏
+            </li>
+          )}
+
           <li>在线咨询</li>
           <li className='active'>
             <a href='tel:400-618-4000'>电话预约</a>

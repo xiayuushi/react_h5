@@ -5,16 +5,10 @@ import './home.css'
 // 让仅嵌入到当前Home组件却不参与路由的子组件SearchBar组件可以使用编程式导航跳转路由
 import { Link, withRouter } from 'react-router-dom'
 
-// 导入 ant-design-mobile 轮播图组件
 import { Carousel } from 'antd-mobile'
-
-// 请求回来的轮播图需要拼接基地址
 import { BASEURL } from '../../utils/base_url'
 
-// 导入redux进行数据共享
 import store from '../../store'
-
-// 导入抽取的公共组件
 import Switchcity from '../../components/switchcity/switchcity'
 
 // 轮播图组件
@@ -31,7 +25,6 @@ class Slide extends Component {
     let res = await this.$request({
       url: '/home/swiper'
     })
-    console.log(res)
 
     if (res.status === 200) {
       this.setState({
@@ -39,9 +32,11 @@ class Slide extends Component {
       })
     }
   }
+
   componentDidMount () {
     this.requestSlide()
   }
+
   render () {
     let { carouselData } = this.state
     return (
@@ -81,13 +76,13 @@ function Menu () {
   return (
     <ul className='menu_con'>
       <li>
-        <Link to='/layout/home/xxx'>
+        <Link to='/layout/houselist'>
           <i className='iconfont icon-zufang1'></i>
         </Link>
         <h4>整租</h4>
       </li>
       <li>
-        <Link to='/layout/home/xxx'>
+        <Link to='/layout/houselist'>
           <i className='iconfont icon-usergroup'></i>
         </Link>
         <h4>合租</h4>
@@ -112,6 +107,7 @@ class Group extends Component {
   state = {
     groupData: []
   }
+
   // 请求租房小组的数据
   requestGroupData = async () => {
     let res = await this.$request({
@@ -123,9 +119,11 @@ class Group extends Component {
       })
     }
   }
+
   componentDidMount () {
     this.requestGroupData()
   }
+
   render () {
     let { groupData } = this.state
     return (
@@ -164,9 +162,11 @@ class News extends Component {
       })
     }
   }
+
   componentDidMount () {
     this.requestNews()
   }
+
   render () {
     let { newsData } = this.state
     return (
@@ -197,7 +197,6 @@ class News extends Component {
 }
 
 // 搜索栏组件
-
 class SearchBar extends Component {
   constructor (props) {
     super(props)
@@ -207,10 +206,11 @@ class SearchBar extends Component {
   }
 
   componentDidMount () {
-    // 判断缓存中是否有当前定位城市的数据，有则从缓存取，无则调接口请求获取
     let sessionCurrentCityInfo = JSON.parse(
       sessionStorage.getItem('currentCityInfo')
     )
+
+    // 判断缓存中是否有当前定位城市的数据，有则从缓存取，无则调接口请求获取
     if (sessionCurrentCityInfo) {
       this.setState({
         currentCity: sessionCurrentCityInfo.label
@@ -248,6 +248,7 @@ class SearchBar extends Component {
       })
     }
   }
+
   render () {
     return (
       <div className='search_bar'>
@@ -260,6 +261,7 @@ class SearchBar extends Component {
     )
   }
 }
+
 // 使用高阶组件让当前不参与路由跳转的组件也能够使用编程式导航跳转路由
 const WithSearchBar = withRouter(SearchBar)
 class Home extends Component {

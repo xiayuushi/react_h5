@@ -3,6 +3,7 @@ import './houselist.css'
 
 import { withRouter } from 'react-router-dom'
 import { PickerView, Toast } from 'antd-mobile'
+// react-virtualized可视化加载的List组件优化长列表、使用其内置的高阶组件进行自适应以及无限加载
 import { List, AutoSizer, InfiniteLoader } from 'react-virtualized'
 
 import store from '../../store'
@@ -10,7 +11,6 @@ import { BASEURL } from '../../utils/base_url'
 
 import notFound from '../../asstes/images/not-found.png'
 
-// 导入抽取的公共组件
 import Switchcity from '../../components/switchcity/switchcity'
 
 // 头部搜索组件
@@ -41,6 +41,7 @@ class Topbar extends Component {
     )
   }
 }
+
 // 筛选组件
 class Filter extends Component {
   constructor (props) {
@@ -99,6 +100,7 @@ class Filter extends Component {
     // 订阅store修改
     this.unsubscribe = store.subscribe(this.fnStoreChange)
   }
+
   // store通知组件更新数据
   fnStoreChange = () => {
     this.setState(
@@ -126,6 +128,7 @@ class Filter extends Component {
       }
     )
   }
+
   // 弹框显示
   fnShowPop = type => {
     // 点击前三个列表选项 弹出.slide面板弹框 否则弹出.tags面板弹框
@@ -195,6 +198,7 @@ class Filter extends Component {
       })
     }
   }
+
   // 弹框隐藏
   fnHidePop = () => {
     this.setState({
@@ -360,7 +364,6 @@ class Filter extends Component {
     paramsData.price = _allFilterVal.price[0].split('|')[1]
     // 接口文档要求more参数是一个字符串（将more数组转成字符串，数组中，多个参数的值需要转成字符串以逗号分隔进行拼接）
     paramsData.more = _allFilterVal.more.join()
-    // console.log(paramsData)
 
     // 因为当前调用的接口与父组件中调用的接口是同一个，且当前是整合了所有选项卡的条件进行调用
     // 因此可以使用子传父，将当前整合的参数对象传入到父组件中的调用方法中，请求所有符合条件的房源数据
@@ -375,6 +378,7 @@ class Filter extends Component {
   }
 
   componentWillUnmount () {
+    // 取消订阅
     this.unsubscribe()
   }
 
@@ -409,12 +413,13 @@ class Filter extends Component {
         </ul>
         {/* 弹框1面板及遮罩层 */}
         <div
+          // 通过布尔值为slide_pannel面板进行添加、移除预置动画类样式，达到条件渲染的目的
           className={
             isSlide ? 'slide_pannel pannel_in' : 'slide_pannel pannel_out'
           }
         >
           <div className='slide_comp'>
-            {/* PickerView 选择器 */}
+            {/* PickerView 级联选择器 拿到用户选择的数据 */}
             <PickerView
               onChange={this.onChange}
               value={allFilterVal[currentClass]}
@@ -431,6 +436,7 @@ class Filter extends Component {
           className={isSlide ? 'mask mask_in' : 'mask mask_out'}
           onClick={this.fnHidePop}
         ></div>
+
         {/* 弹框2面板及遮罩层 */}
         <div
           className={
@@ -483,7 +489,6 @@ class Houselist extends Component {
       currentCityInfo: store.getState(),
       housesList: [],
       housesCount: 0,
-      // 服务器数据是否加载完毕
       isFinished: false
     }
     // 订阅redux中store修改
@@ -607,6 +612,7 @@ class Houselist extends Component {
         // 在当前组件不使用形参接收，而是通过绑定this再传入到当前方法中也是不错的选择
         ...this.params
       }
+      // 此处因为是return关键字之后的逻辑，因此就不进行async与await改写为同步风格了
     }).then(res => {
       this.setState(state => {
         // 拼接新旧数组，实现数据无限加载
@@ -642,7 +648,7 @@ class Houselist extends Component {
                     width={width}
                     onRowsRendered={onRowsRendered}
                     ref={list => {
-                      // ref属性值传入函数的方式，技能满足组件取DOM又不影响调用InfiniteLoader组件中的registerChild()取DOM
+                      // ref属性值传入函数的方式，既能满足组件取DOM又不影响调用InfiniteLoader组件中的registerChild()取DOM
                       // 传入形参list （形参list就是当前组件）
                       // 且将形参list绑定到组件的this.list中 后续可以直接this.list获取到当前List组件的DOM
                       this.list = list

@@ -78,14 +78,9 @@ class Rentlist extends Component {
     }
 
     // 拿到数据设置给state
-    this.setState(
-      {
-        userHousesList: userRentList
-      },
-      () => {
-        console.log(this.state.userHousesList)
-      }
-    )
+    this.setState({
+      userHousesList: userRentList
+    })
   }
   render () {
     let { userHousesList } = this.state

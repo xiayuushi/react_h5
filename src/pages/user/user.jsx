@@ -38,6 +38,17 @@ class User extends Component {
     }
   }
 
+  // 去登录
+  fnGoLogin = () => {
+    let token = localStorage.getItem('haoke_token')
+    if (token) {
+      this.props.history.push('/rentlist')
+    } else {
+      Toast.fail('请先登录后再操作！', 1)
+      return
+    }
+  }
+
   // 退出登录
   loginout = () => {
     Toast.success('已退出登录！')
@@ -82,7 +93,7 @@ class User extends Component {
             <i className='iconfont icon-shoucang'></i>
             <span>我的收藏</span>
           </li>
-          <li onClick={() => this.props.history.push('/rentlist')}>
+          <li onClick={this.fnGoLogin}>
             <i className='iconfont icon-home'></i>
             <span>我的出租</span>
           </li>

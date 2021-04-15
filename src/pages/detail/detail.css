@@ -281,10 +281,13 @@ body {
 }
 
 .down_btns .active {
-
   background-color: #21b97a;
 }
 
 .down_btns .active a {
   color: #fff;
+}
+
+.down_btns .collected {
+  color: #21b97a
 }

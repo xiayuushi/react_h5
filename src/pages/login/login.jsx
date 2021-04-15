@@ -10,7 +10,8 @@ import { withFormik } from 'formik'
 // st7、安装并导入Yup对formik表单进行规则验证
 import * as Yup from 'yup'
 
-// 实例化一个axios用于在formik中发送请求
+// 重新实例化一个axios，区别于之前封装的axios实例
+// 因为在formik回调内部中发送请求，其this不再指向当前组件，因此原先封装的this.$request不能使用
 const instance = axios.create({
   baseURL: BASEURL
 })
@@ -64,8 +65,7 @@ const Login = props => {
           <input
             type='password'
             placeholder='密码'
-            // value={values.password}
-
+            value={values.password}
             onChange={handleChange}
             name='password'
             onBlur={handleBlur}
@@ -111,8 +111,9 @@ const WithLogin = withFormik({
       method: 'post',
       data: values
     })
-    // console.log(res)
+
     let { status, description, body } = res.data
+
     if (status === 200) {
       Toast.success(description, 1, () => {
         // 存储token到本地
